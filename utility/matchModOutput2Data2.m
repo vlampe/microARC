@@ -1,4 +1,4 @@
-function modData = matchModOutput2Data(out, auxVars, Data, FixedParams, varargin)
+function modData = matchModOutput2Data2(out, auxVars, Data, FixedParams, varargin)
 % Returns model output that 'matches' the data used for optimisation.
 % Output struct 'modData' has the same form as the 'Data' struct.
 
@@ -9,7 +9,8 @@ function modData = matchModOutput2Data(out, auxVars, Data, FixedParams, varargin
 
 fitToFullSizeSpectra = []; % determines how modelled output is matched to size data
 extractVarargin(varargin)
-if isempty(fitToFullSizeSpectra) || ~islogical(fitToFullSizeSpectra)
+%evTrajID can be imported manually
+if isempty(fitToFullSizeSpectra) % || ~islogical(fitToFullSizeSpectra)
     fitToFullSizeSpectra = false; % By default assume that the binned/integrated size data is used to tune parameters
 end
 
@@ -19,6 +20,9 @@ ntrajData = size(Data.scalar.EventTraj, 2);
 
 if ntrajOut ~= ntrajData
     warning('Number of trajectories in model output "out" does not equal number of trajectories used in from the Data.')
+    if ~exist('evTrajIX') 
+        error('evTrajIX needs to be imported')  % this is summerTrajsIndex or autumnTrajsIndex, made when Forc is further subsetted for single trajecory runs.
+    end
 end
 
 
@@ -44,49 +48,67 @@ modData.scalar.scaled_Value = modData.scalar.Value;
 % Standardise model output with respect to depth and event using linear mixed models
 for i = 1:nEvent
     iEvent = Data.scalar.Event == i; % index event
-    itraj = evTraj(:,i); % trajectories used for event i
-    vars = unique(Data.scalar.Variable(iEvent)); % variables measured in event i
-    vars = vars(ismember(vars, Vars));
-    iEvent = ismember(Data.scalar.Variable, vars) & iEvent; % omit unmodelled variables from the event index
-    Yearday = Data.scalar.Yearday(find(iEvent, 1));
-    Depth = Data.scalar.Depth(iEvent);
-    clear waterMass
-    [waterMass{1:sum(iEvent),1}] = deal(Data.scalar.waterMass{i});
-    Variable = Data.scalar.Variable(iEvent);
-    modData.scalar.Yearday(iEvent) = Yearday;
-    modData.scalar.Depth(iEvent) = Depth;
-    modData.scalar.waterMass(iEvent) = waterMass;
-    modData.scalar.Variable(iEvent) = Variable;
-    for j = 1:length(vars)
-        % loop through all data types sampled during event i
-        jvar = vars{j};
-        ind = iEvent & strcmp(Data.scalar.Variable, jvar);
-        depth = modData.scalar.Depth(ind);
-        switch jvar
-            % modelled values [depth,trajectory]
-            case 'N'
-                ymod = squeeze(out.N(:,:,Yearday,itraj));
-            case 'PON'
-                ymod = squeeze(out.OM(FixedParams.POM_index,:,FixedParams.OM_N_index,Yearday,itraj));
-                % to fix 'wrong' POM: do it here. ymod = detN + phyN + zooN
-                % ...
-            case 'POC'
-                ymod = squeeze(out.OM(FixedParams.POM_index,:,FixedParams.OM_C_index,Yearday,itraj));
-            case 'chl_a'
-                ymod = squeeze(sum(out.P(:,:,FixedParams.PP_Chl_index,Yearday,itraj)));
+    itraj = evTraj(:,i); % trajectories used for event i (their indeces in Forc.iTraj!; not their IDs)
+    
+    % skip the rest when no modelled traj belongs to this event 
+    % but only, when ntrajOut ~= ntrajData
+     if ntrajOut ~= ntrajData
+        % look up if any modelled trajectory is a member of of itraj
+        % evTrajIX: (original; before subsetting Forc) indices of modelled trajectories
+        % evTraj: List of (original) trajectory indices per event
+
+        if ~any(ismember(itraj, evTrajIX)) % in case none of the moddeled trajs matches an observation event
+            continue % skip to next iteration without running the rest of the for loop
         end
-        % Interpolate modelled output to match observation depths. The
-        % 'extrap' option prevents NaNs at observation depths below the
-        % midpoints of the deepest modelled layer. 'extrap' is not required
-        % if samples from deeper than the midpoint of the deepest modelled
-        % layer are discarded; it is required when all data within the
-        % deepest modelled layer are retained -- see omitDeepSamples.m.
-        ymod = interp1(depths_mod, ymod, depth, 'linear', 'extrap');
-        ymod_scaled = Data.scalar.(['scaleFun_' jvar])(Data.scalar.scale_mu(ind), ...
-            Data.scalar.scale_sig(ind), ymod); % scale model output using same functions that scaled the data
-        modData.scalar.Value(ind,:) = ymod;
-        modData.scalar.scaled_Value(ind,:) = ymod_scaled;
+        
+        % reassign which trajs should be extracted from model output 
+        itraj = find(ismember(evTrajIX, itraj));
     end
+    
+        vars = unique(Data.scalar.Variable(iEvent)); % variables measured in event i
+        vars = vars(ismember(vars, Vars));
+        iEvent = ismember(Data.scalar.Variable, vars) & iEvent; % omit unmodelled variables from the event index
+        Yearday = Data.scalar.Yearday(find(iEvent, 1));
+        Depth = Data.scalar.Depth(iEvent);
+        clear waterMass
+        [waterMass{1:sum(iEvent),1}] = deal(Data.scalar.waterMass{i});
+        Variable = Data.scalar.Variable(iEvent);
+        modData.scalar.Yearday(iEvent) = Yearday;
+        modData.scalar.Depth(iEvent) = Depth;
+        modData.scalar.waterMass(iEvent) = waterMass;
+        modData.scalar.Variable(iEvent) = Variable;
+        for j = 1:length(vars)
+            % loop through all data types sampled during event i
+            jvar = vars{j};
+            ind = iEvent & strcmp(Data.scalar.Variable, jvar);
+            depth = modData.scalar.Depth(ind);
+            switch jvar
+                % modelled values [depth,trajectory]
+                case 'N'
+                    ymod = squeeze(out.N(:,:,Yearday,itraj));
+                case 'PON'
+                    ymod = squeeze(out.OM(FixedParams.POM_index,:,FixedParams.OM_N_index,Yearday,itraj));
+                case 'POC'
+                    ymod = squeeze(out.OM(FixedParams.POM_index,:,FixedParams.OM_C_index,Yearday,itraj));
+                case 'chl_a'
+                    ymod = squeeze(sum(out.P(:,:,FixedParams.PP_Chl_index,Yearday,itraj)));
+            end
+            % Interpolate modelled output to match observation depths. The
+            % 'extrap' option prevents NaNs at observation depths below the
+            % midpoints of the deepest modelled layer. 'extrap' is not required
+            % if samples from deeper than the midpoint of the deepest modelled
+            % layer are discarded; it is required when all data within the
+            % deepest modelled layer are retained -- see omitDeepSamples.m.
+            ymod = interp1(depths_mod, ymod, depth, 'linear', 'extrap');
+            ymod_scaled = Data.scalar.(['scaleFun_' jvar])(Data.scalar.scale_mu(ind), ...
+                Data.scalar.scale_sig(ind), ymod); % scale model output using same functions that scaled the data
+%             modData.scalar.Value(ind,:) = ymod;  
+%             modData.scalar.scaled_Value(ind,:) = ymod_scaled; % change
+%             back in case assignment does not work any more for full model
+%             runs
+            modData.scalar.Value(ind,1:size(ymod,2)) = ymod;
+            modData.scalar.scaled_Value(ind,1:size(ymod_scaled,2)) = ymod_scaled;
+        end
 end
 
 % Input names of measurements not included in model/cost function
@@ -97,6 +119,129 @@ modData.scalar.Variable(~Data.scalar.inCostFunction) = ...
 %% Size spectra
 
 switch fitToFullSizeSpectra
+    
+    case 'trueByWaterMass'
+        
+        % creates waterOriginSpectra (similar to S-Spectra in the Lampe et al 2021 paper) by aggregating
+        % by trajectory origin (full size spectra)
+        
+        % Forc must be passed as varArgIn, to look up watermass of
+        % simulated trajectories!
+        if ~exist('Forc','var')
+            error('For this method "Forc" must be passed as an optional argument' )
+        end
+        
+       
+        timespan = [Data.size.YeardayFirst(1) : Data.size.YeardayLast]; % get time range of sampling campaigns
+        % get depth range of observtions
+        minDepth = Data.size.DepthMin(1);
+        maxDepth = Data.size.DepthMax(1);
+        
+        % FixedParams.zw % edges of depth layers
+        [minVal, minIndex] = min(abs(-minDepth-FixedParams.zw));
+        [minVal, maxIndex] = min(abs(-maxDepth-FixedParams.zw));
+        maxIndex = maxIndex-1;  % only layers shallower than closest depth layer edge! 
+          clear minVal
+        depthIndexRange = [minIndex:maxIndex];
+        
+        % get indices of trajectories by watermass
+        atlTrajs = strcmp(Forc.waterMass, 'Atlantic' );
+        arcTrajs = strcmp(Forc.waterMass, 'Arctic' );
+        
+        ESD = unique(Data.sizeFull.ESD);
+        nESD = length(ESD);
+        
+        % average all trajs by water mass 
+        % whithin the time frame of the sampling campaigns of S-spectra
+        % keep only upper depth layers x (50?)m 
+        % result: to average spectra, one for arctic and one for atlantic
+        % origin -> these are the eqiuvalents to the S spectra
+        
+       
+        allVarsSize = {'cellDensity', 'BioVolDensity'}';
+        
+        % prepare modData struct, compatible to Data struct 
+        modData.size.scenario = Data.size.scenario;
+        
+            regime = Data.size.regime; 
+            wm = strrep(regime, 'warm', 'Atlantic'); 
+            wm = strrep(wm, 'cold', 'Arctic');
+        
+        modData.size.waterMass = wm;
+        modData.size.trophicLevel = Data.size.trophicLevel;
+        modData.size.ESD = Data.size.ESD;
+        modData.size.cellDensity = nan(size(Data.size.cellDensity));
+        modData.size.BioVolDensity = nan(size(Data.size.BioVolDensity));
+        
+        
+        watermasses = unique(modData.size.waterMass);
+        trophicLevels = unique(modData.size.trophicLevel);
+        for i =  1:length(watermasses)
+            WM = watermasses{i};
+            indWM = strcmp(modData.size.waterMass, WM);
+            
+            switch WM
+                case 'Atlantic'
+                    WMtrajs = atlTrajs; 
+                case 'Arctic'
+                    WMtrajs = arcTrajs;
+            end
+            
+            
+            for j = 1:length(trophicLevels)
+                TL = trophicLevels{j};
+                indTL = strcmp(modData.size.trophicLevel, TL);
+                
+                switch TL
+                    case 'autotroph'
+                        planktonclass = FixedParams.phytoplankton;
+                    case 'heterotroph' 
+                        planktonclass = FixedParams.zooplankton;
+                end
+                
+                indY = indWM & indTL; % assign extrapolated model output here
+                
+                % find and average model output correspondenting to indY
+                for k = 1:length(allVarsSize)
+                    var = allVarsSize{k}; 
+                    
+                    switch var
+                        case 'cellDensity'
+                            ymod = auxVars.cellDensity;
+                        case 'BioVolDensity'
+                            ymod = auxVars.biovolume;
+                    end
+                    % filter for class, depth, time, watermass
+                    ymod = ymod(planktonclass,depthIndexRange,timespan,WMtrajs);
+                  
+                    % average over size class (1st) dimension
+                    ymod = mean(ymod, 2:4); % [cells or m^3 / m^3]
+                    
+                    % Transform and interpolate model output to match data.
+                    % Units of ymod are either cells / m3 or m3 / m3 (within each size
+                    % class interval). The full size spectra data have units
+                    % cells / m3 / log10(ESD)
+                    ymod_ = []; % [cells or m^3 / m^3 / log10(ESD)]
+                    for sc = 1:FixedParams.nPP_size % only works if PP and ZP size sclasses are equal
+                        y = ymod(sc); % [cells or m^3 / m^3]
+                        interval = FixedParams.PPdia_intervals(sc:sc+1); % size class j interval boundaries [mu m]
+                        ESDsc = ESD(interval(1) <= ESD & ESD <= interval(2));
+                        nESDsc = length(ESDsc);
+                        y_ = repmat(y ./ diff(log10(interval)), [nESDsc, 1]); % [cells or m^3 / m^3 / log10(ESD)]
+                        ymod_ = vertcat(ymod_, y_); % [cells or m^3 / m^3 / log10(ESD)]  
+                    end
+                    % size(ymod_)
+                    
+                    % ymod_ now contains cell concentration or biovolume
+                    % densities! 
+                    % assign ymod_ to modData 
+                    modData.size.(var)(indY) = ymod_; % [cells or m^3 / m^3 / log10(ESD)]
+
+                end 
+            end
+        end
+
+        
     
     case false
 
@@ -292,15 +437,20 @@ switch fitToFullSizeSpectra
         
         
     case true
+        % this method for full size spectra (not binned), matched by
+        % station
+        % exchange all .size with .sizeFull
         
         allVarsSize = {'cellDensity'; 'BioVolDensity'};
         waterMasses = []; % water origin may not be specified if using data aggregated over all sampling events
-        if isfield(Data.size, 'waterMass')
-            waterMasses = unique(Data.size.waterMass);
+        if isfield(Data.sizeFull, 'waterMass')
+            waterMasses = unique(Data.sizeFull.waterMass);
         end
         % use fully aggregated size data and all trajectories by default (not a
         % good idea as size spectra seem to differ depending on water origin and
         % this influences numerically estimated parameter values).
+       
+        
         default = isempty(waterMasses);
         
         if ~default
@@ -312,31 +462,35 @@ switch fitToFullSizeSpectra
             % water origin group used to fit model. Each data vector is therefore
             % associated to specific particle trajectories => extract these as
             % trajectories from model output, then match times and depths to data.
-            n = Data.size.nSamples;
+            n = Data.sizeFull.nSamples;
             nwaterMasses = length(waterMasses);
-            trophicLevels = unique(Data.size.trophicLevel);
+            trophicLevels = unique(Data.sizeFull.trophicLevel);
             ntrophicLevels = length(trophicLevels);
             % Index trajectories, times and depths to extract from model output --
             % these must match the data
-            traj = Data.size.evTraj; % particle trajectories used for each sample event
+            traj = Data.sizeFull.evTraj; % particle trajectories used for each sample event
             nsamples = size(traj, 1); % number of partucle trajectories used for each sample event
-            ESD = unique(Data.size.ESD);
+            ESD = unique(Data.sizeFull.ESD);
             nESD = length(ESD);
             
-            sampleEvents = unique(Data.size.Event, 'stable');
-            eventTime = unique([Data.size.Event, Data.size.Yearday], 'rows');
+            sampleEvents = unique(Data.sizeFull.Event, 'stable');
+            eventTime = unique([Data.sizeFull.Event, Data.sizeFull.Yearday], 'rows');
             
-            modData.size.Event = Data.size.Event;
-            modData.size.Yearday = Data.size.Yearday;
-            modData.size.Depth = Data.size.Depth;
-            modData.size.trophicLevel = Data.size.trophicLevel;
-            modData.size.ESD = Data.size.ESD;
-            modData.size.cellVolume = Data.size.cellVolume;
-            modData.size.evTraj = Data.size.evTraj;
-            modData.size.waterMass = Data.size.waterMass;
+            modData.sizeFull.Event = Data.sizeFull.Event;
+            modData.sizeFull.Yearday = Data.sizeFull.Yearday;
+            modData.sizeFull.Depth = Data.sizeFull.Depth;
+            modData.sizeFull.trophicLevel = Data.sizeFull.trophicLevel;
+            modData.sizeFull.ESD = Data.sizeFull.ESD;
+            modData.sizeFull.cellVolume = Data.sizeFull.cellVolume;
+            modData.sizeFull.evTraj = Data.sizeFull.evTraj;
+            modData.sizeFull.waterMass = Data.sizeFull.waterMass;
+            
+
+            
             for i = 1:length(allVarsSize)
-                modData.size.(allVarsSize{i}) = nan(n, 1);
+                modData.sizeFull.(allVarsSize{i}) = nan(n, 10);  %% nan(n, 1);
             end
+
             
             for i = 1:length(allVarsSize)
                 vs = allVarsSize{i};
@@ -392,34 +546,103 @@ switch fitToFullSizeSpectra
                 
                 % For each sampling event where size data were measured, extract
                 % the relevant trajectories and the times matching the data
-                for j = 1:ntrophicLevels
-                    ymod{j} = ymod{j}(:,:,:,modData.size.evTraj); % filtered out irrelevant sampling events
-                    ymodSize = size(ymod{j});
-                    ymod_ = nan([ymodSize(1:2), ymodSize(4)]); % dimension [size, depth, sample event]
-                    for jj = 1:size(eventTime, 1)
-                        ymod_(:,:,jj) = ymod{j}(:,:,eventTime(j,2),jj);
-                    end
-                    ymod{j} = ymod_;
-                end
                 
+                % BUT: this messes up the trajectory indices; the result is
+                % trajectrory numbers in evTraj not matching with the
+                % dimensions of ymod anymore. So we leave this out for now!
+                %   %%
+                % 
+%                 for j = 1:ntrophicLevels
+%                     ymod{j} = ymod{j}(:,:,:,modData.sizeFull.evTraj); % filtered out irrelevant sampling events
+%                     ymodSize = size(ymod{j});
+%                     ymod_ = nan([ymodSize(1:2), ymodSize(4)]); % dimension [size, depth, sample event]
+%                     for jj = 1:size(eventTime, 1)
+%                         ymod_(:,:,jj) = ymod{j}(:,:,eventTime(j,2),jj);
+%                     end
+%                     ymod{j} = ymod_;
+%                 end
+%                 
                 % Interpolate modelled depths to derive values corresponding to
                 % sampled depths.
+                
+                % ~~~~
+                % here I think there is a mistake in aidans code: event ev is used as a
+                % index for the trajectory dimension
+                
+                
+                
                 for j = 1:length(sampleEvents)
+                    %%
                     ev = sampleEvents(j);
-                    ind0 = modData.size.Event == ev;
+%                     ind0 = modData.sizeFull.Event == ev;
+%                     for jj = 1:ntrophicLevels
+%                         ymod_ = ymod{jj}(:,:,j); % dimension: [size, depth]
+%                         ymod_ = permute(ymod_, [2, 1]); % move depth to first dimension
+%                         ind1 = ind0 & strcmp(modData.sizeFull.trophicLevel, trophicLevels{jj});
+%                         depths = unique(modData.sizeFull.Depth(ind1));
+%                         ymod_ = interp1(FixedParams.z, ymod_, -abs(depths));
+%                         ymod_ = permute(ymod_, [2, 1]);
+%                         for ij = 1:length(depths)
+%                             depth = depths(ij);
+%                             ind2 = ind1 & modData.sizeFull.Depth == depth;
+%                             modData.sizeFull.(vs)(ind2) = ymod_(:,ij);
+%                         end
+%                     end
+                    
+                    % fix: extract all trajs for each event 
+                    
+                    evTraj = modData.sizeFull.evTraj(:,j); % all 10 trajectories for event j
+                    
+                    % now, if not all trajs are modellled: 
+                    if ntrajOut ~= ntrajData
+                        % look up if any modelled trajectory is a member of of evTaj
+                        % evTrajIX: (original; before subsetting Forc) indices of modelled trajectories
+                        % evTraj: List of (original) trajectory indices per event
+                        
+                        if ~any(ismember(evTraj, evTrajIX))
+                            continue % skip to the next iteration of the loop, because no trajs were modeled for this event
+                        end
+                        
+                        evTraj = find(ismember(evTrajIX, evTraj));  
+                    end
+                    
+                    ind0 = modData.sizeFull.Event == ev;
                     for jj = 1:ntrophicLevels
-                        ymod_ = ymod{jj}(:,:,j); % dimension: [size, depth]
-                        ymod_ = permute(ymod_, [2, 1]); % move depth to first dimension
-                        ind1 = ind0 & strcmp(modData.size.trophicLevel, trophicLevels{jj});
-                        depths = unique(modData.size.Depth(ind1));
-                        ymod_ = interp1(FixedParams.z, ymod_, -abs(depths));
-                        ymod_ = permute(ymod_, [2, 1]);
+                        % ymod_ = ymod{jj}(:,:,j); % dimension: [size, depth]
+                        ymod_2 = ymod{jj}(:,:,evTraj); % dimension: [size, depth, trajs] 
+                         
+                 
+                        
+                        % ymod_ = permute(ymod_, [2, 1]); % move depth to first dimension
+                        ymod_2 = permute(ymod_2, [2, 1, 3]); % move depth to first dimension %%
+                        
+                        % I need a 450x10 matrix as ymod_ in
+                        % modData.sizeFull.(vs)(ind2), not a
+                        % 450x1 -> so that cost functoin can be
+                        % calculatedfor every trajectory
+                        
+                        ind1 = ind0 & strcmp(modData.sizeFull.trophicLevel, trophicLevels{jj});
+                        depths = unique(modData.sizeFull.Depth(ind1));
+                        
+                        % temp = nan(2,450,10);
+                        temp = nan([length(depths), size(ymod_2, 2), 10]);  % dims: no of depths, ESD, trajs / not anymore size(ymod_2, 2, 3), since not always all trajs are modelled 
+                       % interpolate to get depths corresponding to
+                       % observations, per event trajectory
+                       
+                       for jjj = 1:length(evTraj) 
+                            temp(:,:,jjj) = interp1(FixedParams.z, ymod_2(:,:,jjj), -abs(depths));
+                       end 
+                       % reassign temp to ymod_2
+                       ymod_2 = temp; 
+                       
+                       ymod_2 = permute(ymod_2, [2, 1, 3]);
                         for ij = 1:length(depths)
                             depth = depths(ij);
-                            ind2 = ind1 & modData.size.Depth == depth;
-                            modData.size.(vs)(ind2) = ymod_(:,ij);
+                            ind2 = ind1 & modData.sizeFull.Depth == depth;
+                            modData.sizeFull.(vs)(ind2,:) = squeeze(ymod_2(:,ij,:)); %% add ,: and squeeze
                         end
                     end
+                    %%
                 end
             end
         else
