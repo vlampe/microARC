@@ -14,7 +14,7 @@ setParamMethod = 'method3';
 
 %% set tag for this model run for saving of outputs
 
-% % optimisation by Aidan for the corrected model
+% % optimisation by Aidan Hunter for the model with corrected diffusion
 % modTag = 'optimisedParams_AH';
 % pSetName = 'fittedParameters_RMS_Hellinger_ZPratio_Atlantic_correctedDiffusion.mat'
 % % uses fittedParameters_RMS_Hellinger_ZPratio_Atlantic_correctedDiffusion.mat
@@ -25,12 +25,13 @@ setParamMethod = 'method3';
 % theta. use only icefree trajectories for the arctic in summer and adjust
 % faulty DIN values form SINMOD simulation for initial conditions
 
-% latest param set for paper: 30.05.23
+
+% some calibration runs:
 % modTag = 'optimisedParams_AH_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin_fullRunForPaper'
 % modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_5_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_5_pmax_a_3.5_pmax_b_-0.1_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
-%modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.04_theta_5.6_icelessArcSummer_adjustedVin'
+% modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.04_theta_5.6_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_Gmax_a_11_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.04_theta_5.6_Gmax_a_11_icelessArcSummer_adjustedVin'
@@ -42,15 +43,31 @@ setParamMethod = 'method3';
 % modTag = 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_22_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_16_icelessArcSummer_adjustedVin'
 % modTag = 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_closed'
-
 % modTag = 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
 % modTag = 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
-
-modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_fullRunForPaper'; 
 % modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_adjustedVin_fullRunForPaper'; % for comparisions of variability
-
-
 %modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_rPOM_0.02_icelessArcSummer_adjustedVin'
+
+
+% final model config used for the submitted manuscript:
+modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_fullRunForPaper'; 
+
+% % for discussion: a run for only summer atlantic, with increased wPOM. 
+% modTag = 'optimisedParams_AH_wPOM_100_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_AtlanticOnly_forDiscussion'; 
+% modTag = 'optimisedParams_AH_wPOM_100_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_forDiscussion'; 
+% 
+% % for discussion: a run for only summer arctic, with decreased aP. 
+% modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_1.915e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'; 
+% 
+% % for discussion: a run for only summer arctic, with increased aP. 
+% modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_7.66e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'; 
+% 
+% % for discussion: a run for only summer arctic, with even further increased aP. 
+% modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_30e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'; 
+% 
+% % for discussion: a run for only summer arctic, with even further increased aP. 
+% modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_3.83e-06_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'; 
+
 % new trial with increased wPOM: 
 %% add paths 
 % addpath(genpath('../Documents/microARC model/'));
@@ -179,7 +196,16 @@ if (runAllTrajectories == true) && contains(modTag, 'icelessArcSummer')
     
     atlanticTrajs = Forc_s.iTraj(strcmp(Forc_s.waterMass, 'Atlantic'));    % all of them
     arcticTrajs = [2008 2033 2015 2010 2131 2002 2011 2019 2181 2018];   % hand picked based on light availability/ice cover
-   
+
+
+    % for discussion: do some extra runs with just arctic or just atlantic
+    % trajs.
+    if contains(modTag, 'ArcticOnly')
+        atlanticTrajs = []
+    elseif contains(modTag, 'AtlanticOnly')
+        arcticTrajs = []
+    end
+
    
     summerTrajs = [atlanticTrajs arcticTrajs];
 
@@ -254,6 +280,34 @@ switch setParamMethod
 
         % and update
         switch modTag
+            case {'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_fullRunForPaper', ...
+                    'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_adjustedVin_fullRunForPaper'}
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04)
+
+            case {'optimisedParams_AH_wPOM_100_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_AtlanticOnly_forDiscussion',...
+                    'optimisedParams_AH_wPOM_100_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_forDiscussion'}
+                % run for discussion, (only atlantic summer), same as
+                % reference but higher wPOM
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 100, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04)
+
+            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_1.915e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'aP', 1.915e-07)
+
+            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_7.66e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'; 
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'aP', 7.66e-07)
+
+            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_30e-07_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'aP', 30e-07)
+
+            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_aP_3.83e-06_icelessArcSummer_adjustedVin_ArcticOnly_forDiscussion'
+                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'aP', 3.83e-06)
+
 %             case 'optimisedParams_AH_m_b_-0,1'
 %                 % for 'optimisedParams_AH_m_b_-0,1' (decrease m_b)
 %                 Params = updateParameters(Params, FixedParams_s, 'm_b', -0.1)
@@ -354,16 +408,13 @@ switch setParamMethod
 %              case 'optimisedParams_AH_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
 %                  % this is the latest reference solution! 
 %                 Params = updateParameters(Params, FixedParams_s, 'pmax_b', -0.08, 'Qmin_QC_a', 0.05, 'theta', 5.6)
-            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_icelessArcSummer_adjustedVin_fullRunForPaper'
-                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2')
-            case {'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_fullRunForPaper', ...
-                    'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_adjustedVin_fullRunForPaper'}
-                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04)
-            case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_rPOM_0.02_icelessArcSummer_adjustedVin'
-                newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'rPON', 0.02, 'rPOC', 0.02)
+            % case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_icelessArcSummer_adjustedVin_fullRunForPaper'
+            %     newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+            %     Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2')
+            
+            % case 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_rPOM_0.02_icelessArcSummer_adjustedVin'
+            %     newm2 = [0 0 0 0 0 0 0 0 5e-2 0 0 0 0 0 0 0 0 5e-2];
+            %     Params = updateParameters(Params, FixedParams_s, 'wPOM1', 10, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11, 'm2', newm2', 'rDON', 0.04, 'rDOC', 0.04, 'rPON', 0.02, 'rPOC', 0.02)
 
                 
 %               case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.05_theta_5.6_icelessArcSummer_adjustedVin'
@@ -374,16 +425,16 @@ switch setParamMethod
 %                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.04, 'theta', 5.6, 'Gmax_a', 11)
 %             case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_5.6_Gmax_a_11_icelessArcSummer_adjustedVin'
 %                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 5.6, 'Gmax_a', 11)
-            case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin'
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
-            case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
+            % case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin'
+            %     Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
+            % case 'optimisedParams_AH_wPOM_5_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
+            %     Params = updateParameters(Params, FixedParams_s, 'wPOM1', 5, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
 %             case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_0.5_icelessArcSummer_adjustedVin'
 %                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 50, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 0.5)
 %             case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin'
 %                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 50, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
-            case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
-                Params = updateParameters(Params, FixedParams_s, 'wPOM1', 50, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
+%             case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_fullRunForPaper'
+%                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 50, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
 %             case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_icelessArcSummer_adjustedVin_closed'
 %                 Params = updateParameters(Params, FixedParams_s, 'wPOM1', 50, 'pmax_b', -0.08, 'Qmin_QC_a', 0.035, 'theta', 4.2, 'Gmax_a', 11)
 %             case 'optimisedParams_AH_wPOM_50_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_5_icelessArcSummer_adjustedVin'
@@ -565,8 +616,7 @@ filename = [Directories.resultsDir  'autumn_output_' modTag '.mat'];
 
 
     
-% %% some test plots
-% % diese besser outsourcen
+% %% some (deprecated) test plots
 % 
 % % phytoplankton biomass
 % size(out_a.P)
