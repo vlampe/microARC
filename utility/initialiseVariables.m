@@ -53,8 +53,12 @@ if ~exist('Nquota', 'var')
     Nquota = 0.75; % N quota at 3/4 reasonable for initial date of Jan 1st
 end
 
-Q_N = Params.Qmin_QC + Nquota .* Params.delQ_QC;
-P.C = P.N ./ Q_N;
+% this is Adians original. Dying plankton with high C:N in the beginning
+% leave a weird C:N signal in the DOM. 
+%Q_N = Params.Qmin_QC + Nquota .* Params.delQ_QC;
+%P.C = P.N ./ Q_N;
+% we initialise plankton C:N at Redfield for now. 
+P.C = P.N .* 6.625;
 
 % Initialise chlorophyll as chlFrac the maximum ratio with N
 if exist('chlFrac', 'var') && (eval('chlFrac') < 0 || eval('chlFrac') > 1)
@@ -117,12 +121,23 @@ end
 tot_PN = squeeze(sum(P.N));
 tot_PC = squeeze(sum(P.C));
 
+% this is Aidans original initialisation, can result in
+% quite high C/N ratios in the beginning inherited from phy
 OC = OM_frac .* tot_PC;
 DOC = DOM_frac * OC;
 POC = OC - DOC;
 ON = OM_frac .* tot_PN;
 DON = DOM_frac * ON;
 PON = ON - DON;
+% instead: we can initialise Det C:N indepenent from Phy C:N: 
+% ON = OM_frac .* tot_PN;
+% DON = DOM_frac * ON;
+% PON = ON - DON;
+% %OC = OM_frac .* tot_PC;
+% DOC = DON .* 6.625; % initialise DOC with redfield ratio 
+% OC = DON ./ (1-DOM_frac);
+% POC = OC - DOC;
+
 OM(FixedParams.DOM_index,:,FixedParams.OM_C_index,:) = DOC;
 OM(FixedParams.DOM_index,:,FixedParams.OM_N_index,:) = DON;
 OM(FixedParams.POM_index,:,FixedParams.OM_C_index,:) = POC;
