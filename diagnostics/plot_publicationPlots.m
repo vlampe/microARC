@@ -10,13 +10,13 @@ clear all
 modTag = 'optimisedParams_AH_wPOM_10_pmax_b_-0,08_Qmin_QC_a_0.035_theta_4.2_Gmax_a_11_m2_5e-2_atLargeSC_rDOM_0.04_icelessArcSummer_adjustedVin_fullRunForPaper';
 
 %% add paths 
-addpath(genpath('~/Documents/microARC model')) % location of my work with the model
+addpath(genpath('~/Documents/microarc/microARC model')) % location of my work with the model
 addpath(genpath('~/microARC/')) % location of model
 
 
 % set directories
-Directories.resultsDir  = ['~/Documents/microARC model/2nd paper/mod output/' modTag '/'];
-Directories.plotDir  = ['~/Documents/microARC model/2nd paper/mod output/' modTag '/plots/publicationPlots/'];
+Directories.resultsDir  = ['~/Documents/microarc/microARC model/2nd paper/mod output/' modTag '/'];
+Directories.plotDir  = ['~/Documents/microarc/microARC model/2nd paper/mod output/' modTag '/plots/publicationPlots/'];
 
 
 % load model output
@@ -234,14 +234,19 @@ seasons = [{'summer'}, {'autumn'}]
 alldat.summer = summer;
 alldat.autumn = autumn; 
 
+fig = figure
+% t = tiledlayout(2,2)  % makes secondary axes overlap
+% t.TileSpacing = "compact";
+% t.Padding = "compact"
 
-% t = tiledlayout(2,2)
-% t.TileSpacing = "loose";
-% t.Padding = "loose"
 
-figure
-set(gcf, 'Position', [4   372   808   605])
+% set(fig, 'Position', [4   372   808   605])
 %title(t, 'Surface PAR and temperature for all trajectories')
+
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 19, 16])
+
 cmap = lines(2);
 
 sp=0;
@@ -282,9 +287,11 @@ for j = 1:length(seasons)
     sp = sp+1;
     subplot(2,2,sp)
     Pos{sp} = get(gca, "Position");
+    if strcmp(season, "autumn"); lower = 0.1; else; lower = Pos{sp}(2); end
+    set(gca, 'Position', [0.0647, lower, 0.4, Pos{sp}(4)])
 
     patch([data_dates fliplr(data_dates)], [0*[1 1] 5*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
-        'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
+        'edgecolor',[0.8 0.8 0.8],  'facealpha',0.8,'edgealpha',1)
     hold on
 
     p1 = plot(dates, ...
@@ -300,6 +307,8 @@ for j = 1:length(seasons)
 
     % secondary x axis
     ax1 = gca;
+    set(ax1, 'FontSize', 10)
+     xtickformat(ax1, "MMMMM")
     ax2 = axes('Position', ax1.Position, 'XAxisLocation', 'top', 'YAxisLocation', 'right', 'Color', 'none', 'YTick', []);
 
     xline(ax2, dates_l(dat_i), 'color', 'none');
@@ -311,29 +320,31 @@ for j = 1:length(seasons)
     xticklabels(ax2, dateDiff(dat_i))
     xlabel(ax2, 'Temporal distance from target region (d)')
     ax2.XAxis.FontSize = 8;
-    ax2.XLabel.FontSize = 9;
+    % ax2.XLabel.FontSize = 9;
     % add minor labels on the 15th of each month, without label.
     set(ax1,'XMinorTick','on')
     xAx1 = get(ax1,'XAxis');
     xAx1.MinorTickValues=dates_l(dat_i)+15;
-
-    xlim([datetime('2018-01-01') datetime('2018-12-31')])
-    text(10, 4.7, ['PAR ' season ' setup'], 'FontSize',14, 'FontWeight','bold')
+    
+    xlim(ax1, [datetime('2018-01-01') datetime('2018-12-31')])
+    text(10, 4.7, ['PAR ' season ' setup'], 'FontSize',10, 'FontWeight','bold')
 
     hold off
 
 
 
     % Temp surf
-    %nexttile(t)
+    % nexttile(t)
     sp = sp+1;
     subplot(2,2,sp)
     Pos{sp} = get(gca, "Position");
-    set(gca, "Position", [0.52 Pos{sp}(2:4)]);
+    % set(gca, "Position", [0.52 Pos{sp}(2:4)]);
+    if strcmp(season, "autumn"); lower = 0.1; else; lower = Pos{sp}(2); end
+    set(gca, 'Position', [Pos{sp}(1), lower, 0.4, Pos{sp}(4)])
 
 
     patch([data_dates fliplr(data_dates)], [-2*[1 1] 10*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
-        'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
+        'edgecolor',[0.8 0.8 0.8],  'facealpha',0.8,'edgealpha',1)
     hold on
     p1 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), ...
         squeeze(alldat.(season).Forc.T(1,:,strcmp(alldat.(season).Forc.waterMass, 'Atlantic'))), ...
@@ -350,6 +361,8 @@ for j = 1:length(seasons)
 
     % secondary x-axis
     ax1 = gca;
+    set(ax1, 'FontSize', 10)
+    xtickformat(ax1, "MMMMM")
     ax2 = axes('Position', ax1.Position, 'XAxisLocation', 'top', 'YAxisLocation', 'right', 'Color', 'none', 'YTick', []);
 
     xline(ax2, dates_l(dat_i), 'color', 'none');
@@ -360,26 +373,30 @@ for j = 1:length(seasons)
     xticklabels(ax2, dateDiff(dat_i))
     xlabel(ax2, 'Temporal distance from target region (d)')
     ax2.XAxis.FontSize = 8;
-    ax2.XLabel.FontSize = 9;
+    % ax2.XLabel.FontSize = 9;
     % add minor labels on the 15th of each month, without label.
     set(ax1,'XMinorTick','on')
     xAx1 = get(ax1,'XAxis');
     xAx1.MinorTickValues=dates_l(dat_i)+15;
 
-
-    xlim([datetime('2018-01-01') datetime('2018-12-31')])
-    text(10, 7.8, ['Temp ' season ' setup'], 'FontSize',14, 'FontWeight','bold')
+    pause(0.5)
+    xlim(ax1, [datetime('2018-01-01') datetime('2018-12-31')])
+    text(10, 7.8, ['Temp ' season ' setup'], 'FontSize',10, 'FontWeight','bold')
     hold off
    
 end 
 
 leg = legend([p1(1) p2(1)], {'Atlantic', 'Arctic'}, 'NumColumns', 2)
-leg.Position = [0.405 0.01 0.1683 0.0248] % set position manually
+leg.Position = [0.405 0.005 0.1683 0.0248] % set position manually
 
 
 
-saveas(gcf, [Directories.plotDir 'Fig2_ts_forcPARsurf_Tempsurf_watermass.png'])
- 
+% saveas(gcf, [Directories.plotDir 'Fig2_ts_forcPARsurf_Tempsurf_watermass.png'])
+
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig2_ts_forcPARsurf_Tempsurf_watermass_rev1.png']
+saveas(fig, savepath)
+
+
 clearvars -except autumn summer Directories modTag pSetName 
 
 %% fig 3: DIN WOA and model
@@ -400,8 +417,8 @@ clearvars -except autumn summer Directories modTag pSetName
 % 
 
 % load WOA data
-WOAtable.summer = readtable('~/Documents/microARC model/Sat&WOA trajectories/monthlyTrajNSummer.csv'); % mu mol kg^-1
-WOAtable.autumn = readtable('~/Documents/microARC model/Sat&WOA trajectories/monthlyTrajNAutumn.csv');
+WOAtable.summer = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajNSummer.csv'); % mu mol kg^-1
+WOAtable.autumn = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajNAutumn.csv');
 
 % Seawater Potential Density: 1025 kg/m^3  see https://www.nodc.noaa.gov/OC5/WOD/wod18-notes.html
 WOAtable.summer.mean_N = WOAtable.summer.mean_N * 1025 / 1000; % convert mumol/kg to mmol/m3
@@ -430,6 +447,11 @@ x_ticks = datetime(['2018-01-01'; '2018-02-01'; '2018-03-01';...
             '2018-07-01'; '2018-08-01'; '2018-09-01';...
             '2018-10-01'; '2018-11-01'; '2018-12-01']) 
 
+
+fig = figure
+
+set(fig, 'Units', 'centimeters', 'Position', [0, 0, 18, 21.5])
+fontsize(fig, 10, "points")
 
 t = tiledlayout(4,2)
 t.TileSpacing = 'compact';
@@ -480,7 +502,7 @@ for j = 1:length(seasons)
         %     data10,'ShowText','on', 'LevelStep',2)
          
         p = contourf(alldat.(season).Forc.t(:,1), [0; alldat.(season).FixedParams.z; -300], ...
-            test,'ShowText','on', 'LevelStep',1, 'TextStep', 2, 'EdgeAlpha', 0.3)
+            test,'-w', 'ShowText','on', 'LevelStep',1, 'TextStep', 2, 'EdgeAlpha', 0.3)
         
         if i+j == 4; 
             %c = colorbar('Location', 'southoutside', 'Ticks', Ticks, 'TickLabels', TickLabels); 
@@ -494,7 +516,7 @@ for j = 1:length(seasons)
       %  xtickformat('MMM')
         
       xticks(datenum(x_ticks))
-      datetick('x', 'mmm')
+      datetick('x', 'm', 'keepticks', 'keeplimits')
         
 
         ylabel('Depth (m)')
@@ -518,7 +540,7 @@ for j = 1:length(seasons)
         nexttile
         % contourf(Month, -Depth(1:29), WOAmeanWM(1:29,:),'ShowText','on')
         p = contourf(datenum(datetime(2018, Month, 15)), -Depth(1:29), WOAmeanWM(1:29,:), ...
-            'ShowText','on', 'LevelStep',1, 'TextStep', 2, 'EdgeAlpha', 0.3)
+            '-w', 'ShowText','on', 'LevelStep',1, 'TextStep', 2, 'EdgeAlpha', 0.3)
         hold on
         patch(datenum([data_dates fliplr(data_dates)]), [min(ylim)*[1 1] max(ylim)*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
             'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.7)
@@ -536,7 +558,7 @@ for j = 1:length(seasons)
       
         ylim([-200, 0])
         xticks(datenum(x_ticks))
-        datetick('x', 'mmm', 'keeplimits')
+        datetick('x', 'm', 'keepticks', 'keeplimits')
         
 
         title([season ' setup, ' wm ': WOA'])
@@ -547,24 +569,23 @@ end
 pause(0.5)
 colormap(jet())
 
-t.TileSpacing = "compact";
-t.Padding = "compact"
 
-set(gcf, 'Position', [1441 471 791 950]);
+% set(gcf, 'Position', [1441 471 791 950]);
 
-saveas(t, [Directories.plotDir 'Fig3_modWOA_DIN.png'])
+% saveas(t, [Directories.plotDir 'Fig3_modWOA_DIN.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig3_modWOA_DIN_rev1.png']
+saveas(fig, savepath)
 
-
-close all
-clearvars -except autumn summer Directories modTag pSetName
+% close all
+% clearvars -except autumn summer Directories modTag pSetName
 
 %% Fig 4: Chl a remote sensing and model
 
 % SAT Chl trajectories
 
 % load RS data
-rsChl.summer = readtable('~/Documents/microARC model/Sat&WOA trajectories/monthlyTrajChlSummer.csv'); % mu mol kg^-1
-rsChl.autumn = readtable('~/Documents/microARC model/Sat&WOA trajectories/monthlyTrajChlAutumn.csv');
+rsChl.summer = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajChlSummer.csv'); % mu mol kg^-1
+rsChl.autumn = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajChlAutumn.csv');
 
 % reassign model output
 alldat.summer = summer;
@@ -578,6 +599,11 @@ ylab = 'Phy Chl a (mg m^{-3})';
 cmap = lines(2);
 
 depthLayer = [1:5];
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 16])
+fontsize(fig, 10, 'points')
 
 t = tiledlayout(2,2)
 t.TileSpacing = 'compact';
@@ -650,35 +676,48 @@ for j = 1:length(seasons)
         % plot 
         nexttile
 
-        if strcmp(wm, "Arctic"); line_opacity = 0.5; else; line_opacity = 0.1; end
-        
-        p = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod, 'Color', [cmap(1,:) line_opacity]) % group of trajectories
-        ylabel(ylab)
-        xtickformat('MMM')
-        % xlabel('Yearday')
+        if strcmp(wm, "Arctic"); line_opacity = 0.5; else; line_opacity = 0.3; end
+
+        % line_opacity = 0.2
+
+        patch([data_dates fliplr(data_dates)], [0 0 7 7], 'k', 'facecolor', [0.8 0.8 0.8], ...
+            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.9,'edgealpha',0.1)
         hold on
-        p2 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod_mean, 'Color', cmap(1,:), 'LineWidth', 1.5) % plot mean traj
+
+        p = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod, 'Color', [cmap(1,:) line_opacity], 'LineWidth', 0.5, 'LineStyle', '-') % group of trajectories
+        ylabel(ylab)
+        xtickformat('MMMMM')
+
+        plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod_mean, 'Color', [1 1 1], 'LineWidth', 3) % plot mean traj in white (border)
+        p2 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod_mean, 'Color', cmap(1,:), 'LineWidth', 1.5, 'LineStyle', '-') % plot mean traj
          % plot monthly mod means
         p3 = plot(unique(datetime(2018, modMonths, 15)), Ta.mean_mod, 'o', 'Color', cmap(1,:))
          % plot rs
         p4 = plot(datetime(2018, Month, 15), rs_wm, 'o', 'Color', cmap(2,:))
         % add highlight for sampling period
-        patch([data_dates fliplr(data_dates)], [0 0 7 7], 'k', 'facecolor', [0.8 0.8 0.8], ...
-            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
+        
         hold off
         title([season ' setup, ' wm])
-        legend([p2, p3, p4], {'mod.','mod. monthly avg', 'remote sensing'})
-        set(gca,'children',flipud(get(gca,'children')))
+        % legend([p2, p3, p4], {'mod.','mod. monthly avg', 'remote sensing'})
+        % set(gca,'children',flipud(get(gca,'children')))
+        ax = gca
+        ax.Box = "on"
+
     end
 
 end
 
 linkaxes
 pause(0.5)
-set(gcf, 'Position', [1441 899 592 522]);
 
-saveas(t, [Directories.plotDir 'Fig4_fit_modRS_Chl_watermass_46m.png'])
+leg = legend([p2, p3, p4], {'mod.','mod. monthly avg', 'remote sensing'})
+leg.Layout.Tile = 'south';
+leg.Orientation = "horizontal"; 
+% set(gcf, 'Position', [1441 899 592 522]);
 
+% saveas(t, [Directories.plotDir 'Fig4_fit_modRS_Chl_watermass_46m.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig4_fit_modRS_Chl_watermass_46m_rev1.png']
+saveas(fig, savepath)
 
 clearvars -except autumn summer Directories modTag pSetName
 close all
@@ -702,6 +741,12 @@ alldat.autumn = autumn;
 timeFrame = 7; % include simulations +- 7 days around sampling of observations
 
 % plot Vaules over depth, sperated by watermasses
+fig = figure; 
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 24])
+fontsize(fig, 10, 'points')
+
 t = tiledlayout(length(seasons), length(plotVars));
 %title(t, 'Comparision of observations to corresponding model output')
 
@@ -727,21 +772,34 @@ for s = 1:length(seasons)
             case 'DIN'
                 varindexDAT = strcmp(alldat.(season).Data.scalar.Variable, 'N');
                 elemVar = 'N';
-                ylab = 'DIN concentration (mmol m^{-3})';
+                ylab = {['DIN concentration'], ['(mmol m^{-3})']};
+
+                xticks = [0:5:20]; 
+                xminorticks = [0:1:20]; 
 
             case 'Chl a'
                 varindexDAT = strcmp(alldat.(season).Data.scalar.Variable, 'chl_a');
                 elemVar = 'Chl';
-                ylab = 'Chl concentration (mg m^{-3})';
+                ylab = {['Chl concentration'], ['(mg m^{-3})']};
+
+                xticks = [0:6];
+                xminorticks = [0:0.5:6];
+
 
             case 'POC'
                 varindexDAT = strcmp(alldat.(season).Data.scalar.Variable, 'POC');
                 elemVar = 'C';
-                ylab = 'POC concentration (mmol m^{-3})';
+                ylab = {['POC concentration'], ['(mmol m^{-3})']};
+
+                xticks = [0:10:50];
+                xminorticks = [0:5:50];
             case 'PON'
                 varindexDAT = strcmp(alldat.(season).Data.scalar.Variable, 'PON');
-                ylab = 'PON concentration (mmol m^{-3})';
+                ylab = {['PON concentration'], ['(mmol m^{-3})']};
                 elemVar = 'N';
+
+                xticks = [0:1:5];
+                xminorticks = [0:0.5:5];
         end
 
 
@@ -835,19 +893,31 @@ for s = 1:length(seasons)
         % nexttile
         % boxchart(categorical(plotdepth), [plotdat; plotmodVector], 'GroupByColor', colg, ...
         %      'MarkerStyle', '+') %, 'Orientation', 'horizontal'
-        b = boxchart(categorical(plotdepth), [plotdat; plotmodVector], 'GroupByColor', colg, ...
+        b = boxchart(categorical(round(plotdepth)), [plotdat; plotmodVector], 'GroupByColor', colg, ...
              'MarkerStyle', '.') %, 'Orientation', 'horizontal'
         b(1).JitterOutliers = 'on';
         b(2).JitterOutliers = 'on';
-        leg = legend('Location', 'Best')
+        
         view(90,90) % turn it, because when using groupbycolor the orientation horizontal argument does not work
         xlabel('Depth (m)')
         ylabel(ylab)
         ylim([0 Inf])
         title([season ' setup']);
 
+        % make better x ticks 
+        ax = gca
+        ax.YAxis.TickValues = xticks; 
+        ax.YTickLabelRotation = 0; 
+        ax.YAxis.MinorTick = "on"
+
     end % end var loop
 end % end season loop
+
+
+leg = legend
+leg.Layout.Tile = "south"
+leg.Orientation = "horizontal"
+
 
 % pos = get(gcf, 'Position'); %// gives x left, y bottom, width, height
 % width = pos(3);
@@ -856,9 +926,10 @@ end % end season loop
 t.TileSpacing = "compact";
 t.Padding = "compact"
 
-set(gcf, 'Position', [441 1 903 796])
-saveas(t, [Directories.plotDir 'Fig5_fit_modData_boxplot_stateVars.png'])
-
+% set(gcf, 'Position', [441 1 903 796])
+% saveas(t, [Directories.plotDir 'Fig5_fit_modData_boxplot_stateVars.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig5_fit_modData_boxplot_stateVars_rev1.png']
+saveas(fig, savepath)
 
 clearvars -except autumn summer Directories modTag pSetName
 close all
@@ -885,7 +956,7 @@ dlog10ESD = diff(log10(ESDs(1:2)));
 
 x = [ESDs(1), repelem(ESDs(2:end-1),2)', ESDs(end)]; 
 x2 = [x, flip(x)];
-zscore = 1;
+zscore = 1.96; % for 95% CI
  cmap = lines(2); % phy blue, zoo orange
  cmap = [ 0.1 0.9 0.1; 0.1 0.1 1]
 cmap = [100, 221, 23;  144 12 63 ]./255 ;
@@ -914,7 +985,12 @@ for ct = 1:length(concTypes)
             ytext = 'biovol. conc. density'; 
     end
     
-    figure
+    fig = figure
+    set(fig, 'Units', 'centimeters')
+    pos = get(fig, 'Position')
+    set(fig, 'Position', [0, 0, 18, 14])
+    fontsize(fig, 10, 'points')
+
     t = tiledlayout(2,2)
     t.TileSpacing = "compact";
     t.Padding = "compact"
@@ -1021,32 +1097,48 @@ for ct = 1:length(concTypes)
             fill([obsESDs; flip(obsESDs)], inBetween, cmap(2, :), 'FaceAlpha', 0.3, 'EdgeColor', 'none');
             plot(obsESDs, obsZoo, 'Color', cmap(2, :), 'LineStyle', ':', 'LineWidth', 2);
             
-
-            set(gca, 'YScale', 'log', 'XScale', 'log');
+            ax = gca
+            set(ax, 'YScale', 'log', 'XScale', 'log');
             title([season ' setup, ' wm ' trajectories']);
             ylim([miny, Inf])
 
             xlabel('cell size / ESD (µm)')
             ylabel({ytext; yunit})
-            gc = gca;
-            % annotation('textbox','String',totalconcstr, 'Position', gc.Position, 'Vert','bottom','FitBoxToText','on')
+
+            ax.XAxis.TickValues = [1 2 5 10 20 50 100 200];
+            ax.XTickLabelRotation = 0;
+            ax.YAxis.TickValues = [1e4 1e6 1e8 1e10 1e12];
+
             
-            switch concType
-                case 'abundance'
-                    legend('', 'Phy', '', 'Zoo','Location','northeast')
-                case 'biovolume'
-                    legend('', 'Phy', '', 'Zoo','Location','northwest')
-            end
+            % switch concType
+            %     case 'abundance'
+            %         legend('', 'Phy', '', 'Zoo','Location','northeast')
+            %     case 'biovolume'
+            %         legend('', 'Phy', '', 'Zoo','Location','northwest')
+            % end
             
         end
     end
     linkaxes
-    set(gcf, 'Position', [4   372   808   605])
-    saveas(t, [Directories.plotDir 'Fig6ab_spectra_' modVar '_fitAtSamplingSSpectra.png'])
+
+     switch concType
+        case 'abundance'
+            leg = legend('', 'Phy', '', 'Zoo','Location','northeast')
+        case 'biovolume'
+            leg = legend('', 'Phy', '', 'Zoo','Location','northwest')
+     end
+
+     leg.Layout.Tile = "south"
+     leg.Orientation = "horizontal"
+    % set(gcf, 'Position', [4   372   808   605])
+    % saveas(t, [Directories.plotDir 'Fig6ab_spectra_' modVar '_fitAtSamplingSSpectra.png'])
+
+    savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig6ab_spectra_' modVar '_fitAtSamplingSSpectra_rev1.png']
+    saveas(fig, savepath)
 end
 
 
-clearvars -except autumn summer Directories modTag pSetName
+% clearvars -except autumn summer Directories modTag pSetName
 
 %% Fig 7: changes in community size structure
 
@@ -1082,6 +1174,11 @@ for sc = 1:length(sizeclasslabels)
     sizeclasslabels{sc} = [num2str(round(sizeClassEdges(sc),2)) ' - ' num2str(round(sizeClassEdges(sc+1),2)) ' µm'];
 end
 
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 14])
+fontsize(fig, 10, 'points')
 
 t = tiledlayout(2,2)
 t.TileSpacing = "compact";
@@ -1122,7 +1219,7 @@ for j = 1:length(seasons)
         nexttile
         
         patch([data_dates fliplr(data_dates)], [0*[1 1] 10*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
-            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5, 'DisplayName', 'none')
+            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.8,'edgealpha',1, 'DisplayName', 'none')
         % p = area(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod')
        
         hold on
@@ -1132,7 +1229,10 @@ for j = 1:length(seasons)
         
         ylabel('Phy C (g C m^{-2})')
         colororder(phycolors)
+        xtickformat('MMMMM')
         title([season ' setup, ' wm ' trajectories'])
+        ax = gca
+        ax.Box = 'on'
 
     end
 end
@@ -1142,11 +1242,13 @@ leg = legend([p(9) p(8) p(7) p(6) p(5) p(4) p(3) p(2) p(1)], sizeclasslabels,...
     'NumColumns',3)
 leg.Layout.Tile = 'south';
 
-set(gcf, 'Position', [4   372   808   605])
+% set(gcf, 'Position', [4   372   808   605])
 
-saveas(t, [Directories.plotDir 'Fig7_Phy_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm.png'])
+% saveas(t, [Directories.plotDir 'Fig7_Phy_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig7_Phy_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm_rev1.png']
+saveas(fig, savepath)
 
-clearvars -except autumn summer Directories modTag pSetName
+% clearvars -except autumn summer Directories modTag pSetName
 
 
 
@@ -1181,6 +1283,12 @@ for sc = 1:length(sizeclasslabels)
     sizeclasslabels{sc} = [num2str(round(sizeClassEdges(sc),2)) ' - ' num2str(round(sizeClassEdges(sc+1),2)) ' µm'];
 end
 
+
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 14])
+fontsize(fig, 10, 'points')
 
 t = tiledlayout(2,2)
 t.TileSpacing = "compact";
@@ -1219,14 +1327,18 @@ for j = 1:length(seasons)
         
         nexttile
         patch([data_dates fliplr(data_dates)], [0*[1 1] 3*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
-            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
+            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.8,'edgealpha',1)
         
         hold on
         p = area(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), flip(mod)')
         hold off
         ylabel('Zoo C (g C m^{-2})')
         colororder(zoocolors)
+        xtickformat('MMMMM')
         title([season ' setup, ' wm ' trajectories'])
+
+        ax = gca
+        ax.Box = 'on'
     end
 end
 linkaxes
@@ -1235,9 +1347,12 @@ leg = legend([p(9) p(8) p(7) p(6) p(5) p(4) p(3) p(2) p(1)], sizeclasslabels,...
     'NumColumns',3)
 leg.Layout.Tile = 'south';
 
-set(gcf, 'Position', [4   372   808   605])
+% set(gcf, 'Position', [4   372   808   605])
 
-saveas(t, [Directories.plotDir 'FigB2_Zoo_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm.png'])
+% saveas(t, [Directories.plotDir 'FigB2_Zoo_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm.png'])
+
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'FigB2_Zoo_C_biomass_per_sizeclass_int' num2str(sum(zWidth)) 'm_rev1.png']
+saveas(fig, savepath)
 
 clearvars -except autumn summer Directories modTag pSetName
 
@@ -1373,8 +1488,16 @@ sizeClassEdges = summer.FixedParams.PPdia_intervals;
 sizeclasslabels = cell(size(sizeClasses)); 
 
 for sc = 1:length(sizeclasslabels)
-    sizeclasslabels{sc} = [num2str(round(sizeClassEdges(sc),2)) ' - ' num2str(round(sizeClassEdges(sc+1),2)) ' µm'];
+    % sizeclasslabels{sc} = [num2str(round(sizeClassEdges(sc),2)) ' - ' num2str(round(sizeClassEdges(sc+1),2)) ' µm'];
+    sizeclasslabels{sc} = [num2str(round(sizeClassEdges(sc),2)) ' - ' num2str(round(sizeClassEdges(sc+1),2))];
 end
+
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 14])
+fontsize(fig, 10, 'points')
+
 
 t = tiledlayout(2,2)
 t.TileSpacing = "compact";
@@ -1436,15 +1559,17 @@ for j = 1:length(seasons)
 
                 im = imagesc(alldat.(season).Forc.t(:,1), [1:9], ...
                         log10(bioMass), 'AlphaData',0.75);
+
+                clim(log10([0.1 150]));
                 %im.AlphaData = 0.7;
-                colLabels = [0.1 0.2 0.5 1 2 5 10 20 50 100 150];
-                colTicks = log10(colLabels);
-                
-                clim(log10([0.1 150]))
-                c = colorbar('Ticks', colTicks, 'TickLabels', colLabels, ...
-                    'Location', 'southoutside')
-                c.Label.String = 'Phy biomass [mmol C m^{-2}]'
-                
+                % colLabels = [0.1 0.2 0.5 1 2 5 10 20 50 100 150];
+                % colTicks = log10(colLabels);
+                % 
+                % clim(log10([0.1 150]))
+                % c = colorbar('Ticks', colTicks, 'TickLabels', colLabels, ...
+                %     'Location', 'southoutside')
+                % c.Label.String = 'Phy biomass [mmol C m^{-2}]'
+                % 
             end
             
             % find wich size class has the most biomass in all trajs on all
@@ -1460,7 +1585,7 @@ for j = 1:length(seasons)
             % p{ptype} = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mean(mod,2), 'Color', cmap(ptype,:), 'LineWidth', 1.5)
             plot(alldat.(season).Forc.t(:,1), mod, 'Color', [cmap(ptype,:) line_opacity])
             p{ptype} = plot(alldat.(season).Forc.t(:,1), mean(mod,2), 'Color', cmap(ptype,:), 'LineWidth', 1.5)
-            datetick('x', 'mmm', 'keeplimits') % convert datenums to datetime labels
+            
         end
         
         % repeat patch so it is on top
@@ -1468,19 +1593,49 @@ for j = 1:length(seasons)
         'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
         
         hold off
+
+        ax = gca
+        ax.Box = "on"
+
         %xlabel('time')
         yticks([1:9])
         yticklabels(sizeclasslabels)
-        ylabel('size class')
+        ylabel('size class (µm)')
+
+        datetick('x', 'm', 'keeplimits') % convert datenums to datetime labels
+        ax.XTickLabelRotation = 0; 
+        ax.XLim = (datenum([datetime('2018-01-01') datetime('2018-12-31')]))
+      
         title([season ' setup, ' wm ' trajectories'])
         linkaxes;
-        leg = legend([p{1}(1), p{2}(1)], planktontypes);
-        set(leg, 'Location', 'Southeast')
+        % leg = legend([p{1}(1), p{2}(1)], planktontypes);
+        % set(leg, 'Location', 'Southeast')
 
     end
 end
 
-set(gcf, 'Position', [4   372   808   605])
+leg = legend([p{1}(1), p{2}(1)], planktontypes);
+leg.Layout.Tile = "south"
+% leg.Orientation = "horizontal"
+% leg.Position = [0.4423, 0.0989, 0.2401, 0.0378]
+
+colLabels = [0.1 0.2 0.5 1 2 5 10 20 50 100 150];
+colTicks = log10(colLabels);
+c = colorbar('Ticks', colTicks, 'TickLabels', colLabels)
+c.Label.String = 'Phy biomass [mmol C m^{-2}]'
+c.Layout.Tile = 'south'
+c.Layout.TileSpan = [1 1]
+c.Orientation = 'horizontal'
+% c.Position = [0.1755, 0.022, 0.777, 0.0302]
+
+
+
+
+% 
+% cpos = c.Position 
+% c.Position = [cpos(1), cpos(2)-0.1, cpos(3:4)]
+
+% set(gcf, 'Position', [4   372   808   605])
 
 
 cmp = colormap("summer") % summer cmap looks nicer i think
@@ -1488,7 +1643,11 @@ cmp = flipud(cmp)
 colormap(cmp)
 
 
-saveas(t, [Directories.plotDir 'Fig8_dominSizeClass_biomass_PhyZoo_' num2str(abs(alldat.summer.FixedParams.zw(maxdepth+1))) 'm_allTrajs_waterMass_ts_WITHBIOMASS.png'])
+% saveas(t, [Directories.plotDir 'Fig8_dominSizeClass_biomass_PhyZoo_' num2str(abs(alldat.summer.FixedParams.zw(maxdepth+1))) 'm_allTrajs_waterMass_ts_WITHBIOMASS.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig8_dominSizeClass_biomass_PhyZoo_' num2str(abs(alldat.summer.FixedParams.zw(maxdepth+1))) 'm_allTrajs_waterMass_ts_WITHBIOMASS_rev1.png']
+saveas(fig, savepath)
+
+
 
 clearvars -except autumn summer Directories modTag pSetName
 
@@ -1842,6 +2001,12 @@ alldat.autumn = autumn;
 maxdepth = 8;
 cmap = lines(2);
 
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 16])
+fontsize(fig, 10, 'points')
+
 % t = tiledlayout(2,2)
 % t.Padding = 'compact'
 % t.TileSpacing = 'compact'
@@ -1887,24 +2052,30 @@ for j = 1:length(seasons)
         sp = sp+1;
         subplot(2,2,sp)
         Pos{sp} = get(gca, "Position");
-
-        p1 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), prod, 'Color', [cmap(1,:) line_opacity])  %  for multiple trajs
+        
+        patch([data_dates fliplr(data_dates)], [0*[1 1] 250*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
+            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.8,'edgealpha',1)
+        
         hold on
+        p1 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), prod, 'Color', [cmap(1,:) line_opacity])  %  for multiple traj
         p2 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), ex, 'Color', [cmap(2,:) line_opacity])
+       
+        plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mean(prod, 2), 'Color', [1 1 1], 'LineWidth', 3) % white outline
         p4 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mean(prod, 2), 'Color', cmap(1,:), 'LineWidth', 1.5)
+        plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mean(ex, 2), 'Color', [1 1 1], 'LineWidth', 3) % white outline
         p5 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mean(ex, 2), 'Color', cmap(2,:), 'LineWidth', 1.5)
+        
         ylim([0 250])
-        patch([data_dates fliplr(data_dates)], [min(ylim)*[1 1] max(ylim)*[1 1]], 'k', 'facecolor', [0.8 0.8 0.8], ...
-            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.5,'edgealpha',0.5)
+        
         hold off
         
         %xlabel('time')
         ylabel('(mmol C m^{-2} d^{-1})')
        % title([season ' setup, ' wm ' trajectories'])
-        legend([p4 p5], {'production', 'export'})
-        set(gca,'children',flipud(get(gca,'children')))
+        % legend([p4 p5], {'production', 'export'})
+        % set(gca,'children',flipud(get(gca,'children')))
 
-
+        xtickformat("MMMMM")
         % secondary x axis
         ax1 = gca;
         ax2 = axes('Position', ax1.Position, 'XAxisLocation', 'top', 'YAxisLocation', 'right', 'Color', 'none', 'YTick', []);
@@ -1918,25 +2089,33 @@ for j = 1:length(seasons)
         xticklabels(ax2, dateDiff(dat_i))
         xlabel(ax2, 'Temporal distance from target region (d)')
         ax2.XAxis.FontSize = 8;
-        ax2.XLabel.FontSize = 9;
+        % ax2.XLabel.FontSize = 9;
         % add minor labels on the 15th of each month, without label.
         set(ax1,'XMinorTick','on')
         xAx1 = get(ax1,'XAxis');
         xAx1.MinorTickValues=dates_l(dat_i)+15;
 
-        text(10, 225, {[season ' setup,'], [wm ' trajectories']}, 'FontSize',14, 'FontWeight','bold')
+        text(10, 225, {[season ' setup,'], [wm ' trajectories']}, 'FontSize',10, 'FontWeight','bold')
 
 
     end
 end
 linkaxes
 
+
+leg = legend([p4 p5], {'production', 'export'})
+leg.Position = [0.405 0.01 0.1683 0.0248] % set position manually
+leg.Orientation = "horizontal"
+
+
 %leg = legend([p4 p5], {'production', 'export'})
 %leg.Position.Tile = 'south'; 
 
-set(gcf, 'Position', [4   372   808   605])
+% set(gcf, 'Position', [4   372   808   605])
 
-saveas(gcf, [Directories.plotDir 'Fig9_ProdEx' num2str(maxdepth) '_meanallTrajs_waterMass.png'])
+% saveas(gcf, [Directories.plotDir 'Fig9_ProdEx' num2str(maxdepth) '_meanallTrajs_waterMass.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig9_ProdEx' num2str(maxdepth) '_meanallTrajs_waterMass_rev1.png']
+saveas(fig, savepath)
 
 clearvars -except autumn summer Directories modTag pSetName productivity export
 
@@ -1970,7 +2149,12 @@ maxdepth = 8; % 100 m
 
 cmap = colormap("turbo");
 
-figure
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 18])
+fontsize(fig, 10, 'points')
+
 t = tiledlayout(2,2);
 %title(t, ['Model trajectories'])
 maxval = []
@@ -2147,9 +2331,9 @@ for j = 1:length(seasons)
         setm(ax, 'PLabelLocation', binLat);  % Latitude label location
         setm(ax, 'PLineLocation', binLat);  % Grid line location
         
-        setm(ax, 'glinestyle', '-'); % solid gridlines
-        setm(ax, 'glinewidth', 1);  %    thicker gridlines
-        setm(ax, 'flinewidth', 0.5)  % thinner outter box
+        % setm(ax, 'glinestyle', '-'); % solid gridlines
+        setm(ax, 'glinewidth', 0.75);  %    thicker gridlines
+        setm(ax, 'flinewidth', 1)  % thinner outter box
         
         
         
@@ -2176,7 +2360,7 @@ for j = 1:length(seasons)
 
 end
 % styling
-set(gcf, 'Position', [4  373   626   640])
+% set(gcf, 'Position', [4  373   626   640])
 colormap("turbo")
 
 % common colorbar
@@ -2189,9 +2373,11 @@ cb.Position = ([0.13,0.0680,0.775,0.0188]) % manually set the position that woul
 cb.Position = cb.Position - [0, 0.04, 0, 0]; % slightly move the colorbar from its original position
 
 
- saveas(t, [Directories.plotDir 'Fig10_POCProdEx' num2str(maxdepth) '_allTrajs.png'])
+ % saveas(t, [Directories.plotDir 'Fig10_POCProdEx' num2str(maxdepth) '_allTrajs.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig10_POCProdEx' num2str(maxdepth) '_allTrajs_rev1.png']
+saveas(fig, savepath)
 
- clearvars -except autumn summer Directories modTag pSetName productivity export
+clearvars -except autumn summer Directories modTag pSetName productivity export
 
 
 %% Fig 11
@@ -2237,7 +2423,14 @@ for s=1:length(sizeClasses)
     clab{s} = [num2str(round(sizeClassEdges(s),2)) ' - ' num2str(round(sizeClassEdges(s+1),2))]; % ' µm'
 end
 
-t = tiledlayout(length(vars), length(waterMasses),"TileSpacing","compact")
+
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 12, 14])
+fontsize(fig, 10, 'points')
+
+t = tiledlayout(length(vars), length(waterMasses),"TileSpacing","compact", "Padding", "compact")
 %title(t, {'control of phytoplankton', '(summer set-up)'})
 
 
@@ -2271,7 +2464,7 @@ for v=1:length(vars)
                         ilim(s, :), 'Color', cmap(s,:)) % , 'DisplayName', clab
                 end
                 hold off
-                title(['light limitation, ' waterMass])
+                title({['light limitation'],[waterMass]})
                 ylim([0 1])
                 ylabel('\gamma L')
             case 'gammaN'
@@ -2301,7 +2494,7 @@ for v=1:length(vars)
                     plot(datetime(summer.Forc.t(:,1),'ConvertFrom','datenum'), gammaN(s, :), 'Color', cmap(s,:)) %, 'DisplayName', clab
                 end
                 hold off
-                title(['nutrient limitation, ' waterMass])
+                title({['nutrient limitation'], [waterMass]})
                 ylim([0.7 1.01])
                 ylabel('\gamma N')
             case 'V_C:V_N'
@@ -2356,10 +2549,17 @@ for v=1:length(vars)
                 
                 area(datetime(summer.Forc.t(:,1),'ConvertFrom','datenum'), predLoss')
                 colororder(cmap)
-                title(['grazing pressure on phy, ', waterMass])
-                ylabel({'combined grazing','[mmol C m^{-3} d^{-1}]'})
-        end % var switch
 
+                
+                title({['grazing pressure on phy'], [waterMass]})
+                ylabel({'combined grazing','[mmol C m^{-3} d^{-1}]'})
+
+                
+
+        end % var switch
+    xtickformat("MMMMM");
+    ax = gca;
+    ax.YMinorTick = "on"
     end % end var
 end % end wm
 
@@ -2367,9 +2567,10 @@ leg = legend(clab, 'NumColumns', 3)
 title(leg,'size classes [µm]') 
 leg.Layout.Tile = 'south';
 
-set(gcf, 'Position', [-944  -260   448   639])
-saveas(t, [Directories.plotDir 'Fig11_phy_lim' num2str(round(sum(summer.FixedParams.zwidth(1:maxdepth)))) 'summer.png'])
-
+% set(gcf, 'Position', [-944  -260   448   639])
+% saveas(t, [Directories.plotDir 'Fig11_phy_lim' num2str(round(sum(summer.FixedParams.zwidth(1:maxdepth)))) 'summer.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig11_phy_lim' num2str(round(sum(summer.FixedParams.zwidth(1:maxdepth)))) 'summer_rev1.png']
+saveas(fig, savepath)
 
 %% from here on, left over plots that are either moved to appendix or deleted entirely follow. 
 % I have not yet cleaned this up. 

@@ -71,7 +71,7 @@ out.I = Isurf ./ att0 ./ fixedParams.zwidth' .* (exp(-att1) - exp(-att2)); % irr
 %~~~~~~~~~~~
 
 % nutrient quotas
-out.Q = B ./ B_C;
+out.Q = B ./ B_C; % mmol / mmol C
 
 % Nutrient limitation
 out.gammaN = max(0, min(1, (out.Q(:,:,fixedParams.PP_N_index) - params.Qmin_QC) ./ params.delQ_QC));
@@ -87,7 +87,7 @@ out.gammaT = exp(params.A .* (T - params.Tref));
 
 % Background mortality
 % out.mortality = params.m .* B;
-out.mortality = (params.m + params.m2 .* B) .* B;
+out.mortality = (params.m + params.m2 .* B) .* B; % mmol /m^3 / d
 if isfield(params, 'K_m') && any(params.K_m > 0)
     % hyperbolic term reduces mortality at very low abundance
     out.mortality = (B ./ (params.K_m + B)) .* out.mortality;
@@ -103,7 +103,7 @@ out.V = zeros(nsize, nz, nPP_nut); % all uptake rates
 
 % Nutrient uptake
 out.V(:,:,fixedParams.PP_N_index) = ... 
-    MichaelisMenton(params.Vmax_QC, params.kN, N) .* out.gammaT .* out.Qstat;
+    MichaelisMenton(params.Vmax_QC, params.kN, N) .* out.gammaT .* out.Qstat; % d^-1
 
 % Photosynthesis
 zeroLight = out.I(1) == 0;
@@ -124,15 +124,15 @@ if ~zeroLight
     % The min function in rho should only be required to correct numerical
     % inaccuracies when I -> 0.
     out.V(:,:,fixedParams.PP_C_index) = max(0, ... 
-        out.pc - params.xi .* out.V(:,:,fixedParams.PP_N_index)); % photosynthesis minus metabolic cost
-    out.V(:,:,fixedParams.PP_Chl_index) = out.rho .* out.V(:,:,fixedParams.PP_N_index); % chlorophyll production rate (mg Chl / mmol C / day)
+        out.pc - params.xi .* out.V(:,:,fixedParams.PP_N_index)); % photosynthesis minus metabolic cost: carbon production rate (d^-1)
+    out.V(:,:,fixedParams.PP_Chl_index) = out.rho .* out.V(:,:,fixedParams.PP_N_index); % chlorophyll production rate (d^-1) 
 end
 
 out.V(isnan(out.V)) = 0;
 
-out.uptake = B_C .* out.V; % NPP
+out.uptake = B_C .* out.V; % NPP mmol / m^3 / d
 
-out.N_uptake_losses = sum(out.uptake(:,:,fixedParams.PP_N_index));
+out.N_uptake_losses = sum(out.uptake(:,:,fixedParams.PP_N_index)); % mmol N / m^3 / d
 
 
 %~~~~~~~~~~~~~
