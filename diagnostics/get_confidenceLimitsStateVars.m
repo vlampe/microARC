@@ -15,8 +15,8 @@ addpath(genpath('~/Documents/microARC model')) % location of my work with the mo
 addpath(genpath('~/microARC/')) % location of model
 
 % set directories
-Directories.resultsDir  = ['~/Documents/microARC model/2nd paper/mod output/' modTag '/'];
-Directories.plotDir  = ['~/Documents/microARC model/2nd paper/mod output/' modTag '/plots/publicationPlots/'];
+Directories.resultsDir  = ['~/Documents/microarc/microARC model/2nd paper/mod output/' modTag '/'];
+Directories.plotDir  = ['~/Documents/microarc/microARC model/2nd paper/mod output/' modTag '/plots/publicationPlots/'];
 
 
 % load model output
