@@ -42,6 +42,28 @@ autumn = load([Directories.resultsDir  'autumn_output_' modTag '.mat']);
 min(summer.out.P, [], 'all')
 min(summer.out.Z, [], 'all')
 min(autumn.out.P, [], 'all')
+
+%% calc geographic distance between sampling stations
+
+stations = unique(table(summer.Data.scalar.Label, summer.Data.scalar.Latitude, summer.Data.scalar.Longitude, 'VariableNames', ["Label", "Lat", "Lon"]), 'rows')
+
+stations(1,:)
+[arclen,az] = (distance(stations{1, 2}, stations{1, 3}, stations{2,2}, stations{2,3}))
+
+deg2km(distance(stations{1, 2}, stations{1, 3}, stations{2,2}, stations{2,3}))
+
+
+distance(78.235, 0.004, 78.333, -0.008)
+
+
+dist_km = nan(height(stations), height(stations))
+
+for s = 1:height(stations)
+    dist_km(:,s)  = deg2km(distance(stations{s, 2}, stations{s, 3}, stations{:,2}, stations{:,3}))
+end
+
+
+
 %%   METHODS
 
 
