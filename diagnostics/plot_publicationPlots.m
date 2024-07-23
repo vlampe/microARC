@@ -744,7 +744,171 @@ saveas(fig, savepath)
 clearvars -except autumn summer Directories modTag pSetName
 close all
 
+%% Fig 4 Alternative: Chl a remote sensing and model, 8-day remote sensing data
 
+% SAT Chl trajectories
+
+% load RS data
+rsChl.summer = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajChlSummer.csv'); % mu mol kg^-1
+rsChl.autumn = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/monthlyTrajChlAutumn.csv');
+
+rsChl8d.summer = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/8dayTrajChlSummer.csv'); % mu mol kg^-1
+rsChl8d.autumn = readtable('~/Documents/microarc/microARC model/Sat&WOA trajectories/8dayTrajChlAutumn.csv');
+
+
+% reassign model output
+alldat.summer = summer;
+alldat.autumn = autumn; 
+
+seasons = [{'summer'}, {'autumn'}];
+watermasses = [{'Arctic'}, {'Atlantic'}];
+
+
+ylab = 'Phy Chl a (mg m^{-3})';
+cmap = lines(2);
+cmap = [ 0    0.4470    0.7410; 0.8 0 0]
+
+depthLayer = [1:5];
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 18, 16])
+fontsize(fig, 10, 'points')
+
+t = tiledlayout(2,2)
+t.TileSpacing = 'compact';
+t.Padding = 'compact';
+%title(t, 'Surface Chl a concentration, Model vs Remote sensing (upper 46 m)')
+
+for j = 1:length(seasons)
+
+    season = seasons{j};
+    
+    % restructure Chl month table to array: [depth time traj]
+    rs = rsChl.(season);
+    Traj = unique(rs.Traj);
+    Month = unique(rs.month);
+    % Depth = unique(rs.depth);
+
+    nTraj = length(Traj);
+    nMonth = length(Month);
+    % nDepth = length(Depth); gibt nur 1 
+    zwidth = alldat.(season).FixedParams.zwidth(depthLayer); 
+    
+    rs = reshape(rs.mean_chl, [1 nMonth nTraj]);
+
+
+    % restructure Chl 8 day table to array: [depth time traj]
+    rs8d = rsChl8d.(season);
+    Traj = unique(rs8d.Traj);
+    Week = unique(rs8d.week);
+    refDates = unique(rs8d.ref_date)+days(4.5);
+    % Depth = unique(rs.depth);
+
+    nTraj = length(Traj);
+    nWeek = length(Week);
+    
+    rs8d = reshape(rs8d.mean_chl, [1 nWeek nTraj]);
+    
+    ppChlindex = alldat.(season).FixedParams.PP_Chl_index;
+
+    modDates = datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum');
+    modMonths = month(modDates); 
+
+    data_dates = [min(alldat.(season).Data.scalar.Date) max(alldat.(season).Data.scalar.Date)];
+    
+    for i = 1:length(watermasses)
+        wm = watermasses{i}; 
+
+        wmindex = strcmp(alldat.(season).Forc.waterMass, wm);
+        
+        % ____ MODEL____
+        % pick Model Output 
+        
+        mod = alldat.(season).out.P(:,depthLayer,  ppChlindex, :, wmindex); % mg Chl a mm^-3
+        % % average over trajectories
+        % mod = squeeze(mean(mod, 5, 'omitnan')); 
+        
+        % average over depth
+        %mod = squeeze(mean(mod, 2, 'omitnan')); %% this is an error, it should be weighed by zwidth
+        mod = sum((mod .* zwidth'./sum(zwidth)), 2); 
+        % sum over size classes
+        mod = squeeze(sum(mod, 1));
+        
+        % average over trajs
+        mod_mean = mean(mod, 2);
+        
+        %size(mod)
+          % get monthly means of mod
+        T = table;
+        T.mod = mod_mean;
+        T.modMonths = modMonths;
+        G = findgroups(T.modMonths);
+        Ta = groupsummary(T, 'modMonths', 'mean');
+        Ta.mean_mod
+        
+        
+        % ____ remote sensing ____
+        % pick rs Output
+        
+        rs_wm = rs(:,:,wmindex);
+        % average over Trajectories
+        rs_wm = mean(rs_wm, 3, 'omitnan');
+
+        rs_wm8d = rs8d(:,:,wmindex);
+        % average over Trajectories
+        rs_wm8d = mean(rs_wm8d, 3, 'omitnan');
+       
+        
+        % plot 
+        nexttile
+
+        if strcmp(wm, "Arctic"); line_opacity = 0.5; else; line_opacity = 0.3; end
+
+        % line_opacity = 0.2
+
+        patch([data_dates fliplr(data_dates)], [0 0 7 7], 'k', 'facecolor', [0.8 0.8 0.8], ...
+            'edgecolor',[0.8 0.8 0.8],  'facealpha',0.9,'edgealpha',0.1)
+        hold on
+
+        p = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod, 'Color', [cmap(1,:) line_opacity], 'LineWidth', 0.5, 'LineStyle', '-') % group of trajectories
+        ylabel(ylab)
+        xtickformat('MMMMM')
+
+        plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod_mean, 'Color', [1 1 1], 'LineWidth', 3) % plot mean traj in white (border)
+        p2 = plot(datetime(alldat.(season).Forc.t(:,1),'ConvertFrom','datenum'), mod_mean, 'Color', cmap(1,:), 'LineWidth', 1.5, 'LineStyle', '-') % plot mean traj
+         % plot monthly mod means
+        p3 = plot(unique(datetime(2018, modMonths, 15)), Ta.mean_mod, 'o', 'Color', cmap(1,:))
+         % plot rs
+        p4 = plot(datetime(2018, Month, 15), rs_wm, 'o', 'Color', cmap(2,:))
+        % plot 8 day rs
+        p5 = plot(refDates, rs_wm8d, '+', 'Color', cmap(2,:))
+        
+        hold off
+        title([season ' setup, ' wm])
+        % legend([p2, p3, p4], {'mod.','mod. monthly avg', 'remote sensing'})
+        % set(gca,'children',flipud(get(gca,'children')))
+        ax = gca
+        ax.Box = "on"
+
+    end
+
+end
+
+linkaxes
+pause(0.5)
+
+leg = legend([p2, p3, p4, p5], {'mod.','mod. monthly avg', 'rs monthly avg', 'rs 8-day avg'})
+leg.Layout.Tile = 'south';
+leg.Orientation = "horizontal"; 
+% set(gcf, 'Position', [1441 899 592 522]);
+
+% saveas(t, [Directories.plotDir 'Fig4_fit_modRS_Chl_watermass_46m.png'])
+savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig4_fit_modRS_Chl_watermass_46m_8day_rev1.png']
+saveas(fig, savepath)
+
+% clearvars -except autumn summer Directories modTag pSetName
+% close all
 %% Figure 5: RESULTS: fit of model data to observations: boxplots statevars
 
 % copied and adjusted (for total POM) from plot_modelDataFit.m
