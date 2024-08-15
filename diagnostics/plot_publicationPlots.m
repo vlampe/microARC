@@ -85,9 +85,17 @@ proj = projcrs(3995, Authority="EPSG"); % 'stereo',  EPSG code https://epsg.io/3
 Ticks = [15 74 135 196 258 319]
 dates = datetime(autumn.Forc.t,'ConvertFrom','datenum');
 TickLabels = datestr(dates(Ticks, 1));
+
+fig = figure
+set(fig, 'Units', 'centimeters')
+pos = get(fig, 'Position')
+set(fig, 'Position', [0, 0, 19, 17])
+fontsize(fig, 10, 'points')
 colormap("turbo")
 
-t = tiledlayout(2,2, 'TileSpacing','compact')
+t = tiledlayout(2,2)
+
+
 %title(t, ['Model trajectories'])
 
 for j = 1:length(seasons)
@@ -118,7 +126,7 @@ for j = 1:length(seasons)
         % plot maps:
 
         nexttile
-        m = newmap(proj)
+        newmap(proj)
 
          for itraj = 1:size(lat, 2)
             
@@ -139,30 +147,32 @@ for j = 1:length(seasons)
         stationgeotable = table2geotable(scalar_stations); 
         pStations = geoplot(stationgeotable, "+", MarkerSize=3, MarkerEdgeColor="k", MarkerEdgeAlpha=0.6) %
 
-       
-        geolimits([65 85], [-20 20])
+       clim([1 364])
+        geolimits([65 85], [-15 15])
         hold off
         title([season ' setup, ' wm ' trajectories'])
         %cb = colorbar('Ticks', Ticks, 'TickLabels', TickLabels);
         
-
+        % ax = gca;
+        % set(ax, 'TickDir', 'both');
 
 
     end
 
 end
-% styling
-t.Padding = 'compact'
-t.TileSpacing = 'compact'
 
 % common colorbar
 cb = colorbar('Ticks', Ticks, 'TickLabels', TickLabels);
 cb.Layout.Tile = "south"
-
-
 colormap("turbo")
 
-set(gcf, 'Position', [-899  -172   697   464])
+% styling
+ t.Padding = 'compact'
+ t.TileSpacing = 'compact'
+
+% 
+
+% set(fig, 'Position', [-899  -172   697   464])
 
 
 % and save 
@@ -966,7 +976,7 @@ for s = 1:length(seasons)
             case 'Chl a'
                 varindexDAT = strcmp(alldat.(season).Data.scalar.Variable, 'chl_a');
                 elemVar = 'Chl';
-                ylab = {['Chl concentration'], ['(mg m^{-3})']};
+                ylab = {['Chl-{\ita} concentration'], ['(mg m^{-3})']};
 
                 xticks = [0:6];
                 xminorticks = [0:0.5:6];
@@ -1113,7 +1123,7 @@ t.TileSpacing = "compact";
 t.Padding = "compact"
 
 % set(gcf, 'Position', [441 1 903 796])
-% saveas(t, [Directories.plotDir 'Fig5_fit_modData_boxplot_stateVars.png'])
+% % saveas(t, [Directories.plotDir 'Fig5_fit_modData_boxplot_stateVars.png'])
 savepath = ['~/Documents/microARC/Manuscripts/Manuscript microARC Lagrangian modelling plankton variability/REVIEWS/revised_figs/', 'Fig5_fit_modData_boxplot_stateVars_rev1.png']
 saveas(fig, savepath)
 
